@@ -1,25 +1,20 @@
 import json
-import boto3
 
-def save_in_s3(time, rdd, s3_client):
-    time = str(time)
-    file = { time: rdd.collect() }
+import pyspark.sql.types as st
 
-    responce = s3_client.put_object(
-        Bucket="stream_data",
-        Body=json.dumps(file),
-        Key=f"{time}.json"
-    )
+with open('./config.json') as json_data_file:
+    app_config = json.load(json_data_file)
 
-def create_session(region_name, aws_access_key_id, aws_secret_access_key, endpoint_url):
-    session = boto3.session.Session()
 
-    s3_client = session.client(
-        service_name='s3',
-        region_name=region_name,
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        endpoint_url=endpoint_url)
+def save_in_s3_rdd(time, rdd, context, schema):
+    if rdd.isEmpty():
+        return
+    dataframe = context.createDataFrame(rdd, schema)
+    dataframe.write.parquet("{}/{}.parquet".format(app_config["s3_filepath"], str(time)),
+                            mode="overwrite")
 
-    return s3_client
-
+def save_in_s3_schema(time, dataframe):
+    if dataframe.head(1).isEmpty():
+        return
+    dataframe.write.parquet("{}/{}.parquet".format(app_config["s3_filepath"], str(time)),
+                            mode="overwrite")

@@ -43,9 +43,6 @@ def insert_into_table(data, table, columns, conn):
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    # finally:
-    #     if conn is not None:
-    #         conn.close()
 
 
 def initialize_db(conn):
@@ -56,9 +53,6 @@ def initialize_db(conn):
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    # finally:
-    #     if conn is not None:
-    #         conn.close()
 
 
 def create_db_connection(host, port, user, password, database):
@@ -68,9 +62,21 @@ def create_db_connection(host, port, user, password, database):
                                 password=password, database=database)
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    # finally:
-    #     if conn is not None:
-    #         conn.close()
+
     return conn
 
 
+def insert_into_table_schema(dataframe, conn):
+    if dataframe.head(1).isEmpty():
+        return
+
+    query = "INSERT INTO {} {} VALUES {};" \
+        .format(table, columns, values)
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute(query)
+        cursor.close()
+        conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
