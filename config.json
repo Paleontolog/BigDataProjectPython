@@ -1,0 +1,43 @@
+{
+  "region_name": "eu-north-1",
+  "aws_access_key_id": "AKIAJ5V6NEAI3YNTWGDA",
+  "aws_secret_access_key": "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",
+
+  "endpoint_url_s3": "https://scalaforgundataset.s3.eu-north-1.amazonaws.com",
+
+  "redshift_host": "guncluster.cjqdqyy7xgi2.eu-north-1.redshift.amazonaws.com",
+  "redshift_port": 5439,
+  "redshift_user": "awsuser",
+  "redshift_password": "Awsuser12345",
+  "redshift_db_name": "gundb",
+
+  "app_name": "myapp",
+  "batch_duration": 20,
+  "stream_name_kinesis": "gunDataset_Kinesis",
+  "endpoint_url_kinesis": "https://kinesis.eu-north-1.amazonaws.com",
+  "checkpoint_interval": 5,
+
+
+  "database_tables": {
+    "state": {
+      "table_name": "TopState",
+      "fields": [
+        "StateName",
+        "Quantity"
+      ]
+    },
+    "city_or_county": {
+      "table_name": "TopCityOrCounty",
+      "fields": [
+        "CityOrCountyName",
+        "Quantity"
+      ]
+    },
+    "gun_stolen": {
+      "table_name": "GunStolen",
+      "fields": [
+        "Quantity"
+      ]
+    }
+  }
+}
