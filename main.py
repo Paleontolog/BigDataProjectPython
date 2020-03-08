@@ -21,6 +21,9 @@ def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', type=str,
                         help='Type of start environment')
+    parser.add_argument('type', type=str,
+                        help='Type of start environment')
+
 
     parser.add_argument('--aws_access_key_id', type=str,
                         default=app_config["aws_access_key_id"])
@@ -77,12 +80,14 @@ def process_dataframe(lines, db_connection, context, schema):
     def process(time, rdd):
         dataframe = context.createDataFrame(rdd, schema)
 
-        # states = count_dataframe(dataframe, "state")
-        # get_n_and_save_dataframe(states, "state", 10, db_connection)
+        save_in_s3_schema(time, dataframe)
 
-        # city_or_county = count_dataframe(lines, "city_or_county")
-        # get_n_and_save_dataframe(city_or_county, "city_or_county", 10, db_connection)
-        #
+        states = count_dataframe(dataframe, "state")
+        get_n_and_save_dataframe(states, time, 10, db_connection)
+
+        city_or_county = count_dataframe(dataframe, "city_or_county")
+        get_n_and_save_dataframe(city_or_county, time, 10, db_connection)
+
         gun_stolen = count_if_contains_dataframe(dataframe, "gun_stolen", word_matcher)
         get_n_and_save_dataframe(gun_stolen, time, 1, db_connection)
 
@@ -122,9 +127,11 @@ if __name__ == "__main__":
         cur = os.path.abspath(".")
         lines = ssc.textFileStream(rf"{cur}\emulation")
         lines.pprint()
-        #process_rdd(lines, connect, spark, schema)
 
-        process_dataframe(lines, connect, spark, schema)
+        if args.type == "rdd":
+            process_rdd(lines, connect, spark, schema)
+        else:
+            process_dataframe(lines, connect, spark, schema)
     else:
         conf = SparkConf().setAppName(args.app_name).setMaster("spark://13.48.194.172:7077")
         spark = SparkContext(conf=conf)
@@ -136,10 +143,11 @@ if __name__ == "__main__":
                                               awsAccessKeyId=args.aws_access_key_id,
                                               awsSecretKey=args.aws_secret_access_key,
                                               checkpointInterval=args.checkpoint_interval)
-
         lines.pprint()
-        #process_rdd(lines, connect, spark, schema)
-        process_dataframe(lines, connect, sql, schema)
+        if args.type == "rdd":
+            process_rdd(lines, connect, spark, schema)
+        else:
+            process_dataframe(lines, connect, sql, schema)
 
     ssc.start()
     ssc.awaitTermination()

@@ -54,9 +54,8 @@ def count_dataframe(dataframe, field):
 
 
 def get_n_and_save_dataframe(dataframe, time, n, db_connection):
-    dataframe = dataframe.head(n)\
-                .withColumn("Time", str(time))
-    insert_into_table_schema(dataframe, db_connection)
+    dataframe = dataframe.limit(n)
+    insert_into_table_schema(dataframe, time, db_connection)
 
 
 def count_if_contains_dataframe(dataframe, field, word_matcher):
@@ -64,7 +63,7 @@ def count_if_contains_dataframe(dataframe, field, word_matcher):
     return dataframe\
             .where(col(f"{field}").isNotNull() & (~isnan(f"{field}"))) \
             .filter(matcher(field))\
-            .agg(count("incident_id").alias('Quantity'))\
+            .agg(count("incident_id").alias('count'))
 
 
 

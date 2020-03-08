@@ -3,7 +3,7 @@
   "aws_access_key_id": "AKIAJ5V6NEAI3YNTWGDA",
   "aws_secret_access_key": "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",
   "endpoint_url_s3": "https://scalaforgundataset.s3.eu-north-1.amazonaws.com",
-  "s3_filepath": "s3://test",
+  "s3_filepath": "s3a://bucket-name/shri/",
   "redshift_host": "guncluster.cjqdqyy7xgi2.eu-north-1.redshift.amazonaws.com",
   "redshift_port": 5439,
   "redshift_user": "awsuser",
