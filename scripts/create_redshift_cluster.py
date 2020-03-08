@@ -1,5 +1,10 @@
 import boto3
 import argparse
+import json
+
+with open('./config.json') as json_data_file:
+    app_config = json.load(json_data_file)
+
 
 session = boto3.session.Session()
 
@@ -7,23 +12,23 @@ def arg_parse():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--aws_access_key_id', type=str,
-                        default='AKIAJ5V6NEAI3YNTWGDA')
+                        default=app_config["aws_access_key_id"])
     parser.add_argument('--aws_secret_access_key', type=str,
-                        default='xdyXL4jP1SYhiKO9OGhOLYijVbG0BwPnq7J6oRDZ')
+                        default=app_config["aws_secret_access_key"])
     parser.add_argument('--region_name', type=str,
-                        default="eu-north-1")
+                        default=app_config["region_name"])
     parser.add_argument('--db_name', type=str,
-                        default="gundb")
+                        default=app_config["db_name"])
     parser.add_argument('--node_type', type=str,
-                        default="dc2.large")
+                        default=app_config["redshift_node_type"])
     parser.add_argument('--cluster_id', type=str,
-                        default="gunCluster")
+                        default=app_config["redshift_cluster_id"])
     parser.add_argument('--master_username', type=str,
-                        default="awsuser")
+                        default=app_config["redshift_user"])
     parser.add_argument('--master_user_pass', type=str,
-                        default="Awsuser12345")
+                        default=app_config["redshift_password"])
     parser.add_argument('--n_nodes', type=int,
-                        default=2)
+                        default=app_config["redshift_n_nodes"])
 
     return parser.parse_args()
 

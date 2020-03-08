@@ -9,11 +9,17 @@
   "redshift_user": "awsuser",
   "redshift_password": "Awsuser12345",
   "redshift_db_name": "gundb",
+  "redshift_node_type": "dc2.large",
+  "redshift_cluster_id": "gunCluster",
+  "redshift_n_nodes": 2,
   "app_name": "myapp",
   "batch_duration": 20,
   "stream_name_kinesis": "gunDataset_Kinesis",
   "endpoint_url_kinesis": "https://kinesis.eu-north-1.amazonaws.com",
   "checkpoint_interval": 5,
+  "thing_id": "aa-bb",
+  "kinesis_delay": 1,
+  "data_filepath": "D:\\PycharmProjects\\BIG_DATA\\gun-violence-data_01-2013_03-2018.csv",
   "database_tables": {
     "state": {
       "table_name": "TopState",

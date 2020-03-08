@@ -7,6 +7,10 @@ import time
 import pandas as pd
 import argparse
 
+with open('./config.json') as json_data_file:
+    app_config = json.load(json_data_file)
+
+
 
 def put_to_stream(thing_id, data, s3_client, my_stream_name):
     put_response = s3_client.put_record(
@@ -18,22 +22,22 @@ def arg_parse():
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--aws_access_key_id', type=str,
-                        default='AKIAJ5V6NEAI3YNTWGDA')
+                        default=app_config["aws_access_key_id"])
     parser.add_argument('--aws_secret_access_key', type=str,
-                        default='xdyXL4jP1SYhiKO9OGhOLYijVbG0BwPnq7J6oRDZ')
+                        default=app_config["aws_secret_access_key"])
     parser.add_argument('--region_name', type=str,
-                        default="eu-north-1")
+                        default=app_config["region_name"])
     parser.add_argument('--stream_name_kinesis', type=str,
-                        default="gunDataset_Kinesis")
+                        default=app_config["stream_name_kinesis"])
     parser.add_argument('--endpoint_url_kinesis', type=str,
-                        default="https://kinesis.eu-north-1.amazonaws.com")
+                        default=app_config["endpoint_url_kinesis"])
     parser.add_argument('--thing_id', type=str,
-                        default="aa-bb")
+                        default=app_config["thing_id"])
     parser.add_argument('--delay', type=int,
-                        default=1)
+                        default=app_config["kinesis_delay"])
     
     parser.add_argument('--filepath', type=str,
-                        default=r"D:\PycharmProjects\BIG_DATA\gun-violence-data_01-2013_03-2018.csv")
+                        default=app_config["data_filepath"])
     
     return parser.parse_args()
 
