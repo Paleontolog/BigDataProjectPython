@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import os
-import findspark
 import argparse
 import re
 
@@ -99,6 +98,7 @@ if __name__ == "__main__":
     args = arg_parse()
 
     if args.mode == "local":
+        import findspark
         os.environ["JAVA_HOME"] = r"C:\Program Files\Java\jdk1.8.0_241"
         os.environ["SPARK_HOME"] = r"C:\spark-2.4.5-bin-hadoop2.7"
         os.environ['PYSPARK_SUBMIT_ARGS'] = ""
