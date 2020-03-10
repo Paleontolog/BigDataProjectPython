@@ -6,6 +6,8 @@ import argparse
 import re
 import json
 
+from database.s3_utils import *
+from metrics.calculate_metrics import *
 
 with open('./config.json') as json_data_file:
     app_config = json.load(json_data_file)
@@ -108,9 +110,6 @@ if __name__ == "__main__":
     from pyspark import SparkConf, SparkContext
     from pyspark.streaming.kinesis import KinesisUtils, InitialPositionInStream
     from pyspark.sql.context import SQLContext
-
-    from database.s3_utils import *
-    from metrics.calculate_metrics import *
     
 
     schema = st.StructType.fromJson(app_config["all_data_scheme"])
