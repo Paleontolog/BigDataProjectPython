@@ -2,11 +2,9 @@
 # coding: utf-8
 
 import os
-import findspark
 import argparse
 import re
-
-from pyspark.sql.context import SQLContext
+import json
 
 from database.s3_utils import *
 from metrics.calculate_metrics import *
@@ -99,6 +97,7 @@ if __name__ == "__main__":
     args = arg_parse()
 
     if args.mode == "local":
+        import findspark
         os.environ["JAVA_HOME"] = r"C:\Program Files\Java\jdk1.8.0_241"
         os.environ["SPARK_HOME"] = r"C:\spark-2.4.5-bin-hadoop2.7"
         os.environ['PYSPARK_SUBMIT_ARGS'] = ""
@@ -110,6 +109,8 @@ if __name__ == "__main__":
     from pyspark import RDD
     from pyspark import SparkConf, SparkContext
     from pyspark.streaming.kinesis import KinesisUtils, InitialPositionInStream
+    from pyspark.sql.context import SQLContext
+    
 
     schema = st.StructType.fromJson(app_config["all_data_scheme"])
 
