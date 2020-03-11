@@ -1,6 +1,14 @@
 import pandas as pd
+import argparse
 
-parquet = pd.read_parquet(path="parquet/part-00000-2fa892d7-e286-4a6e-abf9-2edec1f19b84-c000.snappy.parquet",
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filename", type=str)
+    return parser.parse_args()
+
+args = parse_args()
+
+parquet = pd.read_parquet(path=args.filename,
                           engine='pyarrow')
 
 print(parquet.head())
