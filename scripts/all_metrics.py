@@ -1,8 +1,17 @@
 import psycopg2
 import json
+import argparse
 
-with open('./config.json') as json_data_file:
+with open('../config.json') as json_data_file:
     app_config = json.load(json_data_file)
+
+def arg_parse():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('all_or_batch', type=str,
+                        help='Type of metrics (all or batch metrics)')
+
+    return parser.parse_args()
 
 
 def create_db_connection(host, port, user, password, database):
@@ -16,21 +25,21 @@ def create_db_connection(host, port, user, password, database):
 
 
 def execute_select(query):
-    cursor = connect.cursor()
-    cursor.execute(query)
-    res = cursor.fetchall()
-    cursor.close()
-    return sorted(res, key=lambda x: x[-1], reverse=True)
+    res = []
+    cursor = None
+    try:
+        cursor = connect.cursor()
+        cursor.execute(query)
+        res = cursor.fetchall()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if cursor is not None:
+            cursor.close()
+    return res
 
 
-if __name__ == "__main__":
-
-    connect = create_db_connection(app_config["redshift_host"],
-                                   app_config["redshift_port"],
-                                   app_config["redshift_user"],
-                                   app_config["redshift_password"],
-                                   app_config["redshift_db_name"])
-
+def batch_metrics():
     query_top_state = "SELECT StateName, sum(Quantity) as ALL_SUM " \
                       "FROM TopState " \
                       "GROUP BY StateName " \
@@ -43,9 +52,39 @@ if __name__ == "__main__":
                                "ORDER BY ALL_SUM DESC " \
                                "LIMIT 10;"
 
-    query_guns = "SELECT sum(Quantity) " \
-                 "FROM TopCityOrCounty;"
+    return query_top_state, query_top_city_or_county
 
+
+def all_metrics():
+    query_top_state = "SELECT Name, Quantity " \
+                      "FROM TopState_CUR " \
+                      "ORDER BY Quantity DESC " \
+                      "LIMIT 10;"
+
+    query_top_city_or_county = "SELECT Name, Quantity " \
+                               "FROM TopCityOrCounty_CUR " \
+                               "ORDER BY Quantity DESC " \
+                               "LIMIT 10;"
+
+    return query_top_state, query_top_city_or_county
+
+
+if __name__ == "__main__":
+
+    connect = create_db_connection(app_config["redshift_host"],
+                                   app_config["redshift_port"],
+                                   app_config["redshift_user"],
+                                   app_config["redshift_password"],
+                                   app_config["redshift_db_name"])
+    args = arg_parse()
+    if args.all_or_batch == "batch":
+        query_top_state, query_top_city_or_county = batch_metrics()
+    else:
+        query_top_state, query_top_city_or_county = all_metrics()
+
+
+    query_guns = "SELECT sum(Quantity) " \
+                 "FROM GunStolen;"
 
     print("Топ штатов: ")
     state = [str(i) for i in execute_select(query_top_state)]

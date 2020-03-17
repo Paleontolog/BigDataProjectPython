@@ -1,13 +1,22 @@
-#!/usr/bin/env python
 # coding: utf-8
 
 import os
 import argparse
 import re
+import sys
 import json
 
-from database.s3_utils import *
-from metrics.calculate_metrics import *
+from metrics.calculate_metrics import get_n_and_save_dataframe
+
+sys.path.append("database")
+sys.path.append("metrics")
+
+
+from s3_utils import *
+from calculate_metrics import *
+from database_utils import *
+from database_utils_global import *
+
 
 with open('./config.json') as json_data_file:
     app_config = json.load(json_data_file)
@@ -20,8 +29,10 @@ def arg_parse():
     parser.add_argument('mode', type=str,
                         help='Type of start environment')
     parser.add_argument('type', type=str,
-                        help='Type of start environment')
+                        help='Type of processed object (rdd or dataframe)')
 
+    parser.add_argument('all_or_batch', type=str,
+                        help='Type of metrics (all or batch metrics)')
 
     parser.add_argument('--aws_access_key_id', type=str,
                         default=app_config["aws_access_key_id"])
@@ -92,11 +103,41 @@ def process_dataframe(lines, db_connection, context, schema):
     lines.foreachRDD(lambda time, rdd: process(time, rdd))
 
 
+def process_dataframe_global(lines, db_connection, context, schema):
+    lines = lines.map(lambda line: json.loads(line))
+
+    def process(time, rdd):
+
+        dataframe = context.createDataFrame(rdd, schema)
+
+        #save_in_s3_schema(time, dataframe)
+
+        states = count_dataframe(dataframe, "state")
+        insert_global_metrics(states, db_connection)
+
+        city_or_county = count_dataframe(dataframe, "city_or_county")
+        insert_global_metrics(city_or_county, db_connection)
+
+        gun_stolen = count_if_contains_dataframe(dataframe, "gun_stolen", word_matcher)
+        get_n_and_save_dataframe(gun_stolen, time, 1, db_connection)
+
+    lines.foreachRDD(lambda time, rdd: process(time, rdd))
+
+
+
+
+
 if __name__ == "__main__":
 
     args = arg_parse()
 
     if args.mode == "local":
+        import findspark
+        # os.environ["JAVA_HOME"] = r"/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+        # os.environ["SPARK_HOME"] = r"/mnt/c/projects/spark2.4.5"
+        # os.environ['PYSPARK_SUBMIT_ARGS'] = ""
+        # findspark.init(r"/mnt/c/projects/spark2.4.5")
+        # findspark.add_packages(["org.apache.spark:spark-streaming-kinesis-asl_2.11:2.4.5"])
         import findspark
         os.environ["JAVA_HOME"] = r"C:\Program Files\Java\jdk1.8.0_241"
         os.environ["SPARK_HOME"] = r"C:\spark-2.4.5-bin-hadoop2.7"
@@ -110,9 +151,9 @@ if __name__ == "__main__":
     from pyspark import SparkConf, SparkContext
     from pyspark.streaming.kinesis import KinesisUtils, InitialPositionInStream
     from pyspark.sql.context import SQLContext
-    
+    from pyspark.sql.types import StructType
 
-    schema = st.StructType.fromJson(app_config["all_data_scheme"])
+    schema = StructType.fromJson(app_config["all_data_scheme"])
 
     connect = create_db_connection(args.redshift_host,
                                    args.redshift_port,
@@ -120,7 +161,10 @@ if __name__ == "__main__":
                                    args.redshift_password,
                                    args.redshift_db_name)
 
-    initialize_db(connect)
+    if args.all_or_batch == "batch":
+        initialize_db(connect, create_all_tables)
+    else:
+        initialize_db(connect, create_all_tables_global)
 
     if args.mode == "local":
         spark = SparkSession.builder.appName(args.app_name).master("local[*]").getOrCreate()
@@ -132,12 +176,19 @@ if __name__ == "__main__":
         if args.type == "rdd":
             process_rdd(lines, connect, spark, schema)
         else:
-            process_dataframe(lines, connect, spark, schema)
+            if args.all_or_batch == "batch":
+                process_dataframe(lines, connect, spark, schema)
+            else:
+                process_dataframe_global(lines, connect, spark, schema)
+
     else:
-        conf = SparkConf().setAppName(args.app_name).setMaster("spark://13.48.194.172:7077")
-        spark = SparkContext(conf=conf)
-        ssc = StreamingContext(spark, args.batch_duration)
-        sql = SQLContext(spark)
+        conf = SparkConf().setAppName(args.app_name)
+        sc = SparkContext(conf=conf)
+        spark = SparkSession.builder \
+                                 .config(conf=conf) \
+                                 .getOrCreate()
+        ssc = StreamingContext(sc, args.batch_duration)
+        sql = SQLContext(sc)
         lines = KinesisUtils.createStream(ssc, args.app_name, args.stream_name_kinesis,
                                               args.endpoint_url_kinesis, args.region_name,
                                               InitialPositionInStream.LATEST,
@@ -148,7 +199,10 @@ if __name__ == "__main__":
         if args.type == "rdd":
             process_rdd(lines, connect, spark, schema)
         else:
-            process_dataframe(lines, connect, sql, schema)
+            if args.all_or_batch == "batch":
+                process_dataframe(lines, connect, sql, schema)
+            else:
+                process_dataframe_global(lines, connect, sql, schema)
 
     ssc.start()
     ssc.awaitTermination()

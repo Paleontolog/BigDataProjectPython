@@ -18,7 +18,7 @@ def arg_parse():
     parser.add_argument('--region_name', type=str,
                         default=app_config["region_name"])
     parser.add_argument('--db_name', type=str,
-                        default=app_config["db_name"])
+                        default=app_config["redshift_db_name"])
     parser.add_argument('--node_type', type=str,
                         default=app_config["redshift_node_type"])
     parser.add_argument('--cluster_id', type=str,
