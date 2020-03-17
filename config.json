@@ -1,7 +1,7 @@
 {
   "region_name": "eu-north-1",
-  "aws_access_key_id": "AKIAJEE7SHXXBVIDYVJQ",
-  "aws_secret_access_key": "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",
+  "aws_access_key_id": "",
+  "aws_secret_access_key": "",
   "endpoint_url_s3": "https://scalaforgundataset.s3.eu-north-1.amazonaws.com",
   "s3_filepath": "s3://scalaforgundataset/stream_data/",
   "redshift_host": "guncluster.cjqdqyy7xgi2.eu-north-1.redshift.amazonaws.com",
