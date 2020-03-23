@@ -17,5 +17,8 @@ def save_in_s3_rdd(time, rdd, context, schema):
 def save_in_s3_schema(time, dataframe):
     if not dataframe.head(1):
         return
-    dataframe.write.parquet("{}/{}.parquet".format(app_config["s3_filepath"], str(time)),
+    time_date = str(time.date())
+    time_hours = str(time.time().hour)
+    dataframe.write.parquet("{}/{}/{}/{}.parquet".format(app_config["s3_filepath"],
+                                                         time_date, time_hours, str(time)),
                             mode="overwrite")

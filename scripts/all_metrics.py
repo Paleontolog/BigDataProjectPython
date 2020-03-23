@@ -2,7 +2,7 @@ import psycopg2
 import json
 import argparse
 
-with open('../config.json') as json_data_file:
+with open('./config.json') as json_data_file:
     app_config = json.load(json_data_file)
 
 def arg_parse():

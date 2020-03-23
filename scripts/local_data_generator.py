@@ -13,7 +13,7 @@ for i in os.listdir(f"{cur}/emulation"):
 def write_f(line):
     with open(r"{}\emulation\{}.json".format(cur, line["incident_id"]), "w") as w:
         json.dump(line, w)
-    time.sleep(0.1)
+    time.sleep(1)
 
 
 for row in data.iterrows():

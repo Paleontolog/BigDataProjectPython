@@ -6,8 +6,6 @@ import re
 import sys
 import json
 
-from metrics.calculate_metrics import get_n_and_save_dataframe
-
 sys.path.append("database")
 sys.path.append("metrics")
 
@@ -122,9 +120,6 @@ def process_dataframe_global(lines, db_connection, context, schema):
         get_n_and_save_dataframe(gun_stolen, time, 1, db_connection)
 
     lines.foreachRDD(lambda time, rdd: process(time, rdd))
-
-
-
 
 
 if __name__ == "__main__":
