@@ -1,3 +1,3 @@
 # BigDataProjectPython
-Запуск с двумя флагами: 
-deploy/local rdd/dataframe
+Запуск с тремя флагами: 
+deploy/local rdd/dataframe all/batch
