@@ -25,12 +25,16 @@ word_matcher = re.compile(".*::(Unknown|Stolen)(\|{2}|$)")
 def arg_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', type=str,
-                        help='Type of start environment')
+                        help='Type of start environment - '
+                             "'local' if started on PC or 'deploy'"
+                             " if started on cluster")
     parser.add_argument('type', type=str,
-                        help='Type of processed object (rdd or dataframe)')
+                        help="Type of processed object 'rdd' or 'dataframe')")
 
     parser.add_argument('all_or_batch', type=str,
-                        help='Type of metrics (all or batch metrics)')
+                        help='Type of metrics - '
+                             "'all' if calculate global metrics"
+                             " or 'batch' if calculate metrics for batch)")
 
     parser.add_argument('--aws_access_key_id', type=str,
                         default=app_config["aws_access_key_id"])

@@ -1,3 +1,11 @@
 # BigDataProjectPython
-Запуск с тремя флагами: 
-deploy/local rdd/dataframe all/batch
+1. Переименовать config.dist.json в config.json, заполнить параметры aws сервисов.
+
+2. Запуск с тремя флагами: 
+    deploy/local - deploy при запуске на кластере, local при тестировании на локальной машине 
+    rdd/dataframe - представление данных при подсчёте метрик 
+    all/batch - all считать метрики глобально (доступно только при выборе dataframe)
+                batch считать метрики для каждого батча (доступно для любого представления данных)
+
+3. Для вывода данных из Redshift запускать scripts/all_metrics.py  с флагами all, если
+    в main был выбран all и batch аналогично
