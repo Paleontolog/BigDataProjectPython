@@ -108,7 +108,7 @@ def process_dataframe_global(lines, db_connection, context, schema):
 
         dataframe = context.createDataFrame(rdd, schema)
 
-        #save_in_s3_schema(time, dataframe)
+        save_in_s3_schema(time, dataframe)
 
         states = count_dataframe(dataframe, "state")
         insert_global_metrics(states, db_connection)
@@ -201,6 +201,3 @@ if __name__ == "__main__":
 
     ssc.start()
     ssc.awaitTermination()
-
-
-
